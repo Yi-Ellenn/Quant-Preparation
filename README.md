@@ -10,17 +10,7 @@ Assumptions of Linear Regression:
 - Check: Plot the residuals versus the fitted values. Use scatter plots between each predictor and the dependent variable.
 
 2. **Multivariate Normality:** The error term, $\epsilon$, is normally distributed.
-- Check:   
-Visual Inspection
-  - Q-Q Plots: Create Q-Q (quantile-quantile) plots of the residuals. In a Q-Q plot, the quantiles of the residuals are plotted against the quantiles of a normal distribution. If the residuals are normally distributed, the points should form an approximately straight line.
-  - Histograms: Plot histograms of the residuals. The histogram should resemble the bell-shaped curve of a normal distribution.
-  -Pairwise Scatterplots: For multivariate normality, scatterplots of pairs of residuals should exhibit an elliptical shape.  
-Statistical Tests:
-  - Shapiro-Wilk Test: This test can be used to assess the normality of residuals. However, it's generally more appropriate for univariate distributions, and the power of the test may decrease with large sample sizes.
-  - Kolmogorov-Smirnov Test: Another test for normality, but like the Shapiro-Wilk test, it is more suitable for univariate normality.
-  - Mardia’s Test: This is a specific test for multivariate normality. It assesses skewness and kurtosis of the data. If the test returns non-significant results, you may assume multivariate normality.
-Mahalanobis Distance:
-  - Mahalanobis Distance: Calculate the Mahalanobis distance for each observation. The Mahalanobis distances should follow a chi-squared distribution with degrees of freedom equal to the number of variables. A Q-Q plot of these distances against the chi-squared distribution can be used to assess multivariate normality.
+
 - Transformation:
 If your data does not meet the assumption of normality, you might consider transforming the variables (e.g., using a log, square root, or Box-Cox transformation) to achieve normality.
 3. **Homoscedasticity:** The variance of the residual $(y−\hat{y})$ is the same for any value of independent variable X.
@@ -236,4 +226,112 @@ Addressing Multicollinearity:
 - Regularization: Techniques like Ridge Regression explicitly handle multicollinearity.
 
 - Resampling Methods: Bootstrapping and cross-validation can sometimes mitigate the problems arising from multicollinearity.
+#### What do you understand by the term "normality of residuals"?
 
+- Normality of residuals is a fundamental assumption of linear regression. It ensures that your model accurately reflects the relationship between variables and that results are reliable.
+
+- Residuals: These are the differences between observed values and the values predicted by the model. They serve as a yardstick for assessing model performance.
+
+- Normal Distribution: A symmetrical, bell-shaped curve characterizes a normal distribution, with the mean, median, and mode sharing the same value.
+
+Diagnostic Tools for Assessing Residual Normality:
+
+- Histogram: Visualizes the distribution of residuals. A bell curve indicates normality.
+
+- Quantile-Quantile (Q-Q) Plot: Compares the quantiles of the residuals to those of a normal distribution. Ideally, the points align with a 45-degree line, indicating normality.
+
+- Kolmogorov-Smirnov (K-S) Test: A statistical test to compare the distribution of sample data to a theoretical normal distribution.
+
+- Shapiro-Wilk Test: Another statistical test to assess if a dataset comes from a normal distribution.
+
+#### Describe the steps involved in preprocessing data for linear regression analysis.
+1. Data Loading
+Ensure data correctness and completeness:
+
+For small datasets, manual checks are viable.
+For large datasets, algorithms can help identify inconsistencies or outliers.
+
+2. Handling Missing Data
+Strategies to Handle Missing Data:
+- Drop records or fields: Useful when missing data is minimal.
+- Mean/Median/Mode Imputation: Substitute missing values with the mean, median, or mode of the feature.
+- Pairwise Deletion: Use available data for each pair of variables in an analysis, ignoring missing values in other variables.
+- Predictive models: Use advanced ML models to predict and fill missing values.(Regression Imputation or K-nearest Neighbors (KNN) Imputation)
+- Multiple Imputation
+- Dedicated Missing Value Algorithms: Use algorithms specifically designed to handle missing data, such as missForest, MICE (Multivariate Imputation by Chained Equations), or GAIN (Generative Adversarial Imputation Networks).
+3. Normalizing/Standardizing Features
+Why Normalize or Standardize:
+
+It can make the learning process faster.
+It ensures that no single feature dominates the others.
+Scale Features Based on Data Distribution:
+
+For normal distributions: StandardScaler
+For non-normal distributions: MinMaxScaler
+4. Encoding Categorical Data
+Reason for Encoding Categorical Variables:
+
+Most ML algorithms are designed for numerical inputs.  
+In linear regression, a categorical variable with more than two categories often becomes multiple dummy variables.
+5. Feature Selection & Engineering
+Remove irrelevant features.  
+Turn qualitative data into quantitative form.  
+Create new features by combining existing ones.  
+6. Split Data into Training and Test Sets  
+The primary purpose of splitting data is to assess model performance. Data is generally split into training and testing sets, often in an 80-20 or 70-30 ratio.
+
+7. VIF and Multicollinearity Checks
+- VIF: A measure to identify multicollinearity. It assesses how much the variance of an estimated regression coefficient increases if the predictors are correlated.
+
+- Correlation Matrix: review pairwise correlations between variables, typically using Pearson correlation coefficient.
+
+#### What feature selection methods can be used prior to building a regression model?
+1. Correlation Analysis  
+Use Pearson's correlation coefficient to determine linear relationships between features and the target. Generally, features with high absolute correlation values (often above 0.5 or 0.7) are selected.
+```
+import pandas as pd
+
+# Assuming 'df' is your DataFrame and 'target' is the target variable
+corr = df.corr()
+corr_with_target = corr[target].abs().sort_values(ascending=False)
+```
+2. Stepwise Regression  
+This iterative technique either adds or removes features one at a time based on a chosen criterion, such as Bayesian Information Criterion (BIC) or Akaike Information Criterion (AIC).
+
+```
+from sklearn.feature_selection import RFE
+from sklearn.linear_model import LinearRegression
+
+linreg = LinearRegression()
+selector = RFE(linreg, n_features_to_select=2)  # Choose desired number of features
+selector.fit(X, y)
+
+selected_features = X.columns[selector.support_]
+```
+3. L1 Regularization (Lasso)  
+L1 regularization introduces a penalty term calculated as the absolute sum of the feature coefficients. This encourages sparsity, effectively selecting features by setting some of their coefficients to zero.
+```
+from sklearn.linear_model import Lasso
+
+lasso = Lasso(alpha=0.1)  # Adjust alpha for desired regularization strength
+lasso.fit(X, y)
+
+selected_features = X.columns[lasso.coef_ != 0]
+```
+4. Tree-Based Methods: Feature Importance  
+Algorithms like Decision Trees and their ensembles, such as Random Forest and Gradient Boosting, naturally quantify feature importance during the model building process.
+```
+from sklearn.ensemble import RandomForestRegressor
+
+forest = RandomForestRegressor()
+forest.fit(X_train, y_train)
+
+feature_importance = forest.feature_importances_
+```
+5. Mutual Information  
+This non-parametric method gauges the mutual dependence between two variables without necessarily assuming a linear relationship.
+```
+from sklearn.feature_selection import mutual_info_regression
+
+mi = mutual_info_regression(X, y)
+``` 
