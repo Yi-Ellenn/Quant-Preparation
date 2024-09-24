@@ -1,4 +1,4 @@
-# Quant-Preparation
+# Quant
 ## Machine Learning:  
 ### linear regression:
 #### What assumptions are made in linear regression modeling?  
